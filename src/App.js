@@ -2,9 +2,8 @@ import "./styles/App.css";
 import PostList from "./components/PostList";
 import { useMemo, useState } from "react";
 import PostForm from "./components/PostForm";
-import MySelect from "./components/UI/select/MySelect";
-import MyInput from "./components/UI/input/MyInput";
 import PostFilter from "./components/PostFilter";
+import MyModal from "./components/UI/MyModal/MyModal";
 
 function App() {
   const [posts, setPosts] = useState([
@@ -58,18 +57,15 @@ function App() {
 
   return (
     <div className="App">
+      <MyModal></MyModal>
       <PostForm create={createPost} />
       <hr style={{ margin: "15px 0" }} />
       <PostFilter filter={filter} setFilter={setFilter} />
-      {sortedAndSelectedPosts.length ? (
-        <PostList
-          remove={removePost}
-          posts={sortedAndSelectedPosts}
-          title={"Пости про JS"}
-        />
-      ) : (
-        <h1 style={{ textAlign: "center" }}>Пости не знайдені</h1>
-      )}
+      <PostList
+        remove={removePost}
+        posts={sortedAndSelectedPosts}
+        title={"Пости про JS"}
+      />
     </div>
   );
 }
