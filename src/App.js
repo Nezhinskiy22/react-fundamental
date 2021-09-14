@@ -1,30 +1,18 @@
 import "./styles/App.css";
 import PostList from "./components/PostList";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import PostForm from "./components/PostForm";
 import PostFilter from "./components/PostFilter";
 import MyModal from "./components/UI/MyModal/MyModal";
 import MyButton from "./components/UI/button/MyButton";
 import { usePosts } from "./hooks/usePosts";
+import { useEffect } from "react";
+import PostService from "./API/PostService";
+import Loader from "./components/UI/loader/Loader";
+import { useFetching } from "./hooks/useFetching";
 
 function App() {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      title: "JavaScript",
-      body: "Description",
-    },
-    {
-      id: 2,
-      title: "Python",
-      body: "Description",
-    },
-    {
-      id: 3,
-      title: "Java",
-      body: "Description",
-    },
-  ]);
+  const [posts, setPosts] = useState([]);
 
   const [filter, setFilter] = useState({
     sort: "",
@@ -33,7 +21,23 @@ function App() {
 
   const [modal, setModal] = useState(false);
 
+  const [totalCout, setTotalCount] = useState(0);
+
+  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
+
   const sortedAndSelectedPosts = usePosts(posts, filter.sort, filter.query);
+
+  const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+    const response = await PostService.getAll(limit, page);
+    setPosts(response.data);
+    console.log(response.headers["x-total-count"]);
+    setTotalCount(response.headers["x-total-count"]);
+  });
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
@@ -48,6 +52,12 @@ function App() {
 
   return (
     <div className="App">
+      <MyButton
+        style={{ display: "block", marginTop: 10 }}
+        onClick={fetchPosts}
+      >
+        Get posts
+      </MyButton>
       <MyButton style={{ marginTop: 30 }} onClick={() => setModal(true)}>
         Створити запис
       </MyButton>
@@ -56,11 +66,20 @@ function App() {
       </MyModal>
       <hr style={{ margin: "15px 0" }} />
       <PostFilter filter={filter} setFilter={setFilter} />
-      <PostList
-        remove={removePost}
-        posts={sortedAndSelectedPosts}
-        title={"Пости про JS"}
-      />
+      {postError && <h1>Сталася помилка. {postError}</h1>}
+      {isPostsLoading ? (
+        <div
+          style={{ display: "flex", justifyContent: "center", marginTop: 50 }}
+        >
+          <Loader />
+        </div>
+      ) : (
+        <PostList
+          remove={removePost}
+          posts={sortedAndSelectedPosts}
+          title={"Пости про JS"}
+        />
+      )}
     </div>
   );
 }
