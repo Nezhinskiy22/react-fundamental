@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import PostService from "./API/PostService";
 import Loader from "./components/UI/loader/Loader";
 import { useFetching } from "./hooks/useFetching";
+import { getPageCount, getPagesArray } from "./utils/pages";
 
 function App() {
   const [posts, setPosts] = useState([]);
@@ -21,20 +22,20 @@ function App() {
 
   const [modal, setModal] = useState(false);
 
-  const [totalCout, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
 
   const sortedAndSelectedPosts = usePosts(posts, filter.sort, filter.query);
-
+  let pagesArray = getPagesArray(totalPages);
   const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
     const response = await PostService.getAll(limit, page);
     setPosts(response.data);
-    console.log(response.headers["x-total-count"]);
-    setTotalCount(response.headers["x-total-count"]);
+    const totalCount = response.headers["x-total-count"];
+    setTotalPages(getPageCount(totalCount, limit));
   });
-
+  console.log(totalPages);
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -80,6 +81,14 @@ function App() {
           title={"Пости про JS"}
         />
       )}
+
+      <div className="page__wrapper">
+        {pagesArray.map((p) => (
+          <span className={page === p ? "page page__current" : "page"}>
+            {p}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
