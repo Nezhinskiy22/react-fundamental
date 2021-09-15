@@ -1,0 +1,11 @@
+import React from "react";
+
+const About = () => {
+  return (
+    <div>
+      <h1>This app developed as pet project</h1>
+    </div>
+  );
+};
+
+export default About;
