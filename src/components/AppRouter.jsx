@@ -1,9 +1,10 @@
 import React from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
+import { AuthContext } from "../context";
 import { privateRoutes, publicRoutes } from "../router/Routes";
 
 const AppRouter = () => {
-  const isAuth = false;
+  const { isAuth, setIsAuth } = useContext(AuthContext);
   return isAuth ? (
     <Switch>
       {privateRoutes.map((route) => (
